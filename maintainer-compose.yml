@@ -1,0 +1,54 @@
+version: '3.9'
+
+networks:
+  mysql-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.5.0/24
+
+  postgres-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.6.0/24
+
+services:
+
+  # ====================
+  # CONTAINER DEV 1
+  # ====================
+  mysql:
+    extends:
+      file: ./mysql-dev/docker-compose.yml
+      service: mysql
+    networks:
+      mysql-net:
+        ipv4_address: 172.0.5.10
+
+  phpmyadmin:
+    extends:
+      file: ./mysql-dev/docker-compose.yml
+      service: phpmyadmin
+    networks:
+      mysql-net:
+        ipv4_address: 172.0.5.11
+
+  # ====================
+  # CONTAINER DEV 2
+  # ====================
+  postgres:
+    extends:
+      file: ./postgres-dev/docker-compose.yml
+      service: postgres
+    networks:
+      postgres-net:
+        ipv4_address: 172.0.6.10
+
+  adminer:
+    extends:
+      file: ./postgres-dev/docker-compose.yml
+      service: adminer
+    networks:
+      postgres-net:
+        ipv4_address: 172.0.6.11
