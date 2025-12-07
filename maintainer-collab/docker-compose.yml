@@ -1,0 +1,75 @@
+version: '3.9'
+
+networks:
+  mysql-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.5.0/24
+
+  postgres-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.0.6.0/24
+
+  collab-net:
+    driver: bridge
+
+services:
+  # Import dari Dev 1
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: devdb
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: devpass
+    networks:
+      mysql-net:
+        ipv4_address: 172.0.5.10
+      collab-net:
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "8080:80"
+    networks:
+      mysql-net:
+        ipv4_address: 172.0.5.11
+      collab-net:
+
+  # Import dari Dev 2
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: rootpass
+      POSTGRES_DB: devdb
+      POSTGRES_USER: dev
+    networks:
+      postgres-net:
+        ipv4_address: 172.0.6.10
+      collab-net:
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8081:8080"
+    networks:
+      postgres-net:
+        ipv4_address: 172.0.6.11
+      collab-net:
+
+  # Container untuk mengetes koneksi antar subnet
+  tester:
+    image: alpine
+    container_name: tester
+    command: sh -c "sleep 3600"
+    networks:
+      collab-net:
